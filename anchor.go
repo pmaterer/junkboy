@@ -5,7 +5,7 @@ type Anchor struct {
 	URL string `json:"url"`
 }
 
-type AnchorRepository interface {
+type anchorRepository interface {
 	AddAnchor(a Anchor) (int, error)
 	UpdateAnchor(a Anchor) error
 	GetAnchor(id int) (Anchor, error)
@@ -14,10 +14,10 @@ type AnchorRepository interface {
 }
 
 type AnchorService struct {
-	Repository AnchorRepository
+	Repository anchorRepository
 }
 
-func NewAnchorService(r AnchorRepository) *AnchorService {
+func NewAnchorService(r anchorRepository) *AnchorService {
 	return &AnchorService{
 		Repository: r,
 	}

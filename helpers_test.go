@@ -1,6 +1,9 @@
 package junkboy
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func assertNoError(t *testing.T, err error) {
 	t.Helper()
@@ -23,5 +26,15 @@ func assertEqual(t *testing.T, expected interface{}, got interface{}) {
 		t.Fatalf("Not equal: \n"+
 			"expected: %+v\n"+
 			"got: %+v", expected, got)
+	}
+}
+
+func assertBytesEqual(t *testing.T, expected []byte, actual []byte) {
+	t.Helper()
+	n := bytes.Compare(expected, actual)
+	if n != 0 {
+		t.Fatalf("Not equal: \n"+
+			"expected: % x\n"+
+			"actual: % x", expected, actual)
 	}
 }
