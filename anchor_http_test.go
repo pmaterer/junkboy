@@ -116,7 +116,7 @@ func TestGetAnchorsHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 			handler := http.HandlerFunc(anchorHandler.getAnchorsHandler)
 
-			req, err := http.NewRequest(http.MethodGet, "/anchors", nil)
+			req, err := http.NewRequest(http.MethodGet, "/anchors", http.NoBody)
 			assertNoError(t, err)
 
 			handler.ServeHTTP(rr, req)
@@ -133,28 +133,28 @@ func TestGetAnchorHandler(t *testing.T) {
 		method         func(id int) (Anchor, error)
 		expectedStatus int
 		responseBody   []byte
-		pathId         string
+		pathID         string
 	}{
 		{
 			name:           "Get anchor ok",
 			method:         func(id int) (Anchor, error) { return testAnchor, nil },
 			expectedStatus: http.StatusOK,
 			responseBody:   anchorJSON,
-			pathId:         "1",
+			pathID:         "1",
 		},
 		{
 			name:           "Get anchor server error",
 			method:         func(id int) (Anchor, error) { return testAnchor, errors.New("internal server error") },
 			expectedStatus: http.StatusInternalServerError,
 			responseBody:   []byte(`{"status":500,"message":"internal server error"}`),
-			pathId:         "1",
+			pathID:         "1",
 		},
 		{
 			name:           "Get anchor bad id",
 			method:         func(id int) (Anchor, error) { return testAnchor, errors.New("internal server error") },
 			expectedStatus: http.StatusBadRequest,
 			responseBody:   []byte(`{"status":400,"message":"invalid anchor id 'abc'"}`),
-			pathId:         "abc",
+			pathID:         "abc",
 		},
 	}
 
@@ -165,9 +165,9 @@ func TestGetAnchorHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 			handler := http.HandlerFunc(anchorHandler.getAnchorHandler)
 
-			req, err := http.NewRequest(http.MethodGet, "/anchor/1", nil)
+			req, err := http.NewRequest(http.MethodGet, "/anchor/1", http.NoBody)
 			assertNoError(t, err)
-			ctx := context.WithValue(req.Context(), ctxKey{}, []string{tt.pathId})
+			ctx := context.WithValue(req.Context(), ctxKey{}, []string{tt.pathID})
 
 			handler.ServeHTTP(rr, req.WithContext(ctx))
 
@@ -227,26 +227,26 @@ func TestDeleteAnchorHandler(t *testing.T) {
 		method         func(id int) error
 		expectedStatus int
 		responseBody   []byte
-		pathId         string
+		pathID         string
 	}{
 		{
 			name:           "Delete anchor ok",
 			method:         func(id int) error { return nil },
 			expectedStatus: http.StatusNoContent,
-			pathId:         "1",
+			pathID:         "1",
 		},
 		{
 			name:           "Delete anchor server error",
 			method:         func(id int) error { return errors.New("internal server error") },
 			expectedStatus: http.StatusInternalServerError,
-			pathId:         "1",
+			pathID:         "1",
 			responseBody:   []byte(`{"status":500,"message":"internal server error"}`),
 		},
 		{
 			name:           "Delete anchor bad id",
 			method:         func(id int) error { return nil },
 			expectedStatus: http.StatusBadRequest,
-			pathId:         "abc",
+			pathID:         "abc",
 			responseBody:   []byte(`{"status":400,"message":"invalid anchor id 'abc'"}`),
 		},
 	}
@@ -258,9 +258,9 @@ func TestDeleteAnchorHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 			handler := http.HandlerFunc(anchorHandler.deleteAnchorHandler)
 
-			req, err := http.NewRequest(http.MethodDelete, "/anchor/1", nil)
+			req, err := http.NewRequest(http.MethodDelete, "/anchor/1", http.NoBody)
 			assertNoError(t, err)
-			ctx := context.WithValue(req.Context(), ctxKey{}, []string{tt.pathId})
+			ctx := context.WithValue(req.Context(), ctxKey{}, []string{tt.pathID})
 
 			handler.ServeHTTP(rr, req.WithContext(ctx))
 

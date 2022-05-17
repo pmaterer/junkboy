@@ -46,6 +46,7 @@ func (r *AnchorSQLiteRepository) UpdateAnchor(a Anchor) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -54,9 +55,11 @@ func (r *AnchorSQLiteRepository) GetAnchor(id int) (Anchor, error) {
 
 	anchor := Anchor{}
 	err := row.Scan(&anchor.ID, &anchor.URL)
+
 	if err != nil {
 		return anchor, err
 	}
+
 	return anchor, err
 }
 
@@ -68,12 +71,15 @@ func (r *AnchorSQLiteRepository) GetAnchors() ([]Anchor, error) {
 	defer rows.Close()
 
 	anchors := []Anchor{}
+
 	for rows.Next() {
 		anchor := Anchor{}
 		err = rows.Scan(&anchor.ID, &anchor.URL)
+
 		if err != nil {
 			return nil, err
 		}
+
 		anchors = append(anchors, anchor)
 	}
 

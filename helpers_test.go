@@ -7,6 +7,7 @@ import (
 
 func assertNoError(t *testing.T, err error) {
 	t.Helper()
+
 	if err != nil {
 		t.Fatalf("Unexpected error: \n"+
 			"%+v", err)
@@ -15,13 +16,15 @@ func assertNoError(t *testing.T, err error) {
 
 func assertError(t *testing.T, err error) {
 	t.Helper()
+
 	if err == nil {
 		t.Fatalf("Expected error, got nil")
 	}
 }
 
-func assertEqual(t *testing.T, expected interface{}, got interface{}) {
+func assertEqual(t *testing.T, expected, got interface{}) {
 	t.Helper()
+
 	if expected != got {
 		t.Fatalf("Not equal: \n"+
 			"expected: %+v\n"+
@@ -29,8 +32,9 @@ func assertEqual(t *testing.T, expected interface{}, got interface{}) {
 	}
 }
 
-func assertBytesEqual(t *testing.T, expected []byte, actual []byte) {
+func assertBytesEqual(t *testing.T, expected, actual []byte) {
 	t.Helper()
+
 	n := bytes.Compare(expected, actual)
 	if n != 0 {
 		t.Fatalf("Not equal: \n"+

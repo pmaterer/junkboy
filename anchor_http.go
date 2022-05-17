@@ -66,12 +66,14 @@ func (h *AnchorHTTPHandler) getAnchorsHandler(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	writeJSON(w, http.StatusOK, anchors)
 }
 
 func (h *AnchorHTTPHandler) getAnchorHandler(w http.ResponseWriter, r *http.Request) {
 	idField := getField(r, 0)
 	id, err := strconv.Atoi(idField)
+
 	if err != nil {
 		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid anchor id '%s'", idField))
 		return
@@ -82,6 +84,7 @@ func (h *AnchorHTTPHandler) getAnchorHandler(w http.ResponseWriter, r *http.Requ
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	writeJSON(w, http.StatusOK, anchors)
 }
 
@@ -109,9 +112,9 @@ func (h *AnchorHTTPHandler) updateAnchorHandler(w http.ResponseWriter, r *http.R
 }
 
 func (h *AnchorHTTPHandler) deleteAnchorHandler(w http.ResponseWriter, r *http.Request) {
-
 	idField := getField(r, 0)
 	id, err := strconv.Atoi(idField)
+
 	if err != nil {
 		writeError(w, http.StatusBadRequest, fmt.Sprintf("invalid anchor id '%s'", idField))
 		return

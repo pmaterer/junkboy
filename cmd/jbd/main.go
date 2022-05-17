@@ -12,6 +12,7 @@ import (
 func main() {
 	dbDSN := "junkboy.db"
 	db, err := junkboy.NewSQLiteDB(dbDSN)
+
 	if err != nil {
 		log.Fatalf("failed to open db %s: %v", dbDSN, err)
 	}

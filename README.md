@@ -17,6 +17,9 @@ go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@late
 
 * [Common CRUD Design in Go](https://www.gobeyond.dev/crud/)
 * [Alex Edwards blog](https://www.alexedwards.net/blog)
+* [questionable services](https://blog.questionable.services/)
+* [REST Servers in Go](https://eli.thegreenplace.net/2021/rest-servers-in-go-part-1-standard-library/)
+* [Calhoun.io](https://www.calhoun.io/)
 
 #### Repos
 

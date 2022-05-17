@@ -1,3 +1,5 @@
+build:
+	go build ./cmd/jbd/.
 
 run:
 	go run ./cmd/jbd/.
@@ -6,7 +8,10 @@ test:
 	go test -v ./...
 
 lint:
-	golangci-lint run --enable-all
+	golangci-lint run
+
+fmt:
+	go fmt ./...
 
 migrations-up:
 	migrate -path=./db/migrations -database=$(JUNKBOY_DB_DSN) up

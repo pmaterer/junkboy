@@ -28,6 +28,7 @@ func (s *AnchorService) AddAnchor(a Anchor) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return id, nil
 }
 
@@ -36,6 +37,7 @@ func (s *AnchorService) UpdateAnchor(a Anchor) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -44,6 +46,7 @@ func (s *AnchorService) GetAnchor(id int) (Anchor, error) {
 	if err != nil {
 		return anchor, err
 	}
+
 	return anchor, nil
 }
 
@@ -52,6 +55,7 @@ func (s *AnchorService) GetAnchors() ([]Anchor, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return anchors, nil
 }
 
@@ -60,5 +64,6 @@ func (s *AnchorService) DeleteAnchor(id int) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
