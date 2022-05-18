@@ -58,7 +58,7 @@ func TestAddAnchorHandler(t *testing.T) {
 			contentType:    "application/json",
 			method:         func(a Anchor) (int, error) { return 1, nil },
 			expectedStatus: http.StatusBadRequest,
-			responseBody:   `{"status":400,"message":"json: cannot unmarshal bool into Go struct field Anchor.url of type string"}`,
+			responseBody:   `{"status":400,"message":"body contains incorrect JSON type field \"url\" (at character 12)"}`,
 		},
 		{
 			name:           "Add anchor internal error",
