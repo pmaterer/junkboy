@@ -1,13 +1,13 @@
 package junkboy
 
 import (
-	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"mime"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -16,28 +16,88 @@ type LoggingMiddleware struct {
 	handler http.Handler
 }
 
-func (h *LoggingMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-
-	h.handler.ServeHTTP(w, r)
-	log.Printf("%s %s %s", r.Method, r.RequestURI, time.Since(start))
-}
-
 func NewLoggingMiddleware(handler http.Handler) *LoggingMiddleware {
 	return &LoggingMiddleware{handler}
 }
 
-// type LogWriter struct {
-// 	http.ResponseWriter
-// }
+func (h *LoggingMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 
-// func (w LogWriter) Write(p []byte) (n int, err error) {
-// 	n, err = w.ResponseWriter.Write(p)
-// 	if err != nil {
-// 		log.Printf("Write failed: %v", err)
-// 	}
-// 	return
-// }
+	h.handler.ServeHTTP(w, r)
+	log.Printf("%s %s in %s", r.Method, r.RequestURI, time.Since(start))
+}
+
+type CorsMiddleware struct {
+  handler http.Handler
+}
+
+func NewCorsMiddleware(handler http.Handler) *CorsMiddleware {
+  return &CorsMiddleware{handler}
+}
+
+
+func (h *CorsMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Access-Control-Allow-Origin", "*")
+  h.handler.ServeHTTP(w, r)
+}
+
+func readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
+	maxBytes := 1_048_576
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	err := dec.Decode(dst)
+	if err != nil {
+		// We triage the error.
+		var syntaxError *json.SyntaxError
+
+		var unmarshalTypeError *json.UnmarshalTypeError
+
+		var invalidUnmarshalError *json.InvalidUnmarshalError
+
+		switch {
+		case errors.As(err, &syntaxError):
+			return fmt.Errorf("body contains badly-formed JSON (at character %d)", syntaxError.Offset)
+
+		// In some circumstances `Decode()` may return an `io.ErrUnexpectedEOF` error
+		// for syntax errors in the JSON. See: https://github.com/golang/go/issues/25956
+		case errors.Is(err, io.ErrUnexpectedEOF):
+			return errors.New("body contains badly-formed JSON")
+
+		// JSON value is the wrong type for the target.
+		case errors.As(err, &unmarshalTypeError):
+			return fmt.Errorf("body contains incorrect JSON type field %q (at character %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
+
+		// This is returned if the request body is empty.
+		case errors.Is(err, io.EOF):
+			return errors.New("body must not be empty")
+
+		case strings.HasPrefix(err.Error(), "json: unknown field "):
+			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
+			return fmt.Errorf("body contains unknown key %s", fieldName)
+
+		case err.Error() == "http: request body too large":
+			return fmt.Errorf("body must not be larger than %d bytes", maxBytes)
+
+		// This will be returned if we pass a non-nil pointer to `Decode()`.
+		case errors.As(err, &invalidUnmarshalError):
+			panic(err)
+
+		default:
+			return err
+		}
+	}
+
+	// Ensure request body contains a single JSON value.
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF {
+		return errors.New("body must only contain a single JSON value")
+	}
+
+	return nil
+}
 
 func logerr(n int, err error) {
 	if err != nil {
@@ -69,69 +129,6 @@ func writeError(w http.ResponseWriter, status int, message string) {
 type ErrorResponse struct {
 	Status  int    `json:"status"`
 	Message string `json:"message"`
-}
-
-type Router struct {
-	pathPrefix string
-	routes     []route
-}
-
-func NewRouter(pathPrefix string) *Router {
-	return &Router{
-		pathPrefix: strings.TrimSuffix(pathPrefix, "/"),
-	}
-}
-
-func (rt *Router) AddRoute(method, pattern string, handler http.HandlerFunc) {
-	newRt := newRoute(method, rt.pathPrefix+pattern, handler)
-	rt.routes = append(rt.routes, newRt)
-}
-
-type ctxKey struct{}
-
-func (rt *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var allow []string
-
-	for _, route := range rt.routes {
-		matches := route.regex.FindStringSubmatch(r.URL.Path)
-		if len(matches) > 0 {
-			if r.Method != route.method {
-				allow = append(allow, route.method)
-				continue
-			}
-
-			ctx := context.WithValue(r.Context(), ctxKey{}, matches[1:])
-			route.handler(w, r.WithContext(ctx))
-
-			return
-		}
-	}
-
-	if len(allow) > 0 {
-		w.Header().Set("Allow", strings.Join(allow, ", "))
-		http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
-
-		return
-	}
-
-	http.NotFound(w, r)
-}
-
-type route struct {
-	method  string
-	regex   *regexp.Regexp
-	handler http.HandlerFunc
-}
-
-func newRoute(method, pattern string, handler http.HandlerFunc) route {
-	return route{method, regexp.MustCompile("^" + pattern + "$"), handler}
-}
-
-func getField(r *http.Request, index int) string {
-	//nolint:errcheck // Need to figure out what error value can be.
-	fields := r.Context().Value(ctxKey{}).([]string)
-
-	return fields[index]
 }
 
 func contentTypeIsValid(w http.ResponseWriter, r *http.Request, expectedContentType string) bool {

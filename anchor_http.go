@@ -1,7 +1,6 @@
 package junkboy
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -42,11 +41,8 @@ func (h *AnchorHTTPHandler) addAnchorHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
 	var anchor Anchor
-	if err := dec.Decode(&anchor); err != nil {
+	if err := readJSON(w, r, &anchor); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -93,11 +89,8 @@ func (h *AnchorHTTPHandler) updateAnchorHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
 	var anchor Anchor
-	if err := dec.Decode(&anchor); err != nil {
+	if err := readJSON(w, r, &anchor); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}

@@ -24,7 +24,7 @@ func main() {
 	router := junkboy.NewRouter("/v1")
 	anchorHandler.RegisterRoutes(router)
 
-	mw := junkboy.NewLoggingMiddleware(router)
+	mw := junkboy.NewCorsMiddleware(junkboy.NewLoggingMiddleware(router))
 
 	srv := &http.Server{
 		Addr:    ":8080",
