@@ -38,6 +38,7 @@ func NewCorsMiddleware(handler http.Handler) *CorsMiddleware {
 
 func (h *CorsMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Access-Control-Allow-Origin", "*")
+  w.Header().Set("Access-Control-Allow-Headers", "*")
   h.handler.ServeHTTP(w, r)
 }
 

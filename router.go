@@ -18,8 +18,8 @@ func NewRouter(pathPrefix string) *Router {
 	}
 }
 
-func (rt *Router) AddRoute(method, pattern string, handler http.HandlerFunc) {
-	newRt := newRoute(method, rt.pathPrefix+pattern, handler)
+func (rt *Router) AddRoute(methods []string, pattern string, handler http.HandlerFunc) {
+	newRt := newRoute(methods, rt.pathPrefix+pattern, handler)
 	rt.routes = append(rt.routes, newRt)
 }
 
@@ -31,10 +31,16 @@ func (rt *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, route := range rt.routes {
 		matches := route.regex.FindStringSubmatch(r.URL.Path)
 		if len(matches) > 0 {
-			if r.Method != route.method {
-				allow = append(allow, route.method)
-				continue
-			}
+      for _, method := range route.methods {
+        if r.Method != method {
+          allow = append(allow, method)
+          continue
+        }
+      }
+      //if r.Method != route.method {
+			//	allow = append(allow, route.method)
+			//	continue
+			//}
 
 			ctx := context.WithValue(r.Context(), ctxKey{}, matches[1:])
 			route.handler(w, r.WithContext(ctx))
@@ -54,13 +60,13 @@ func (rt *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type route struct {
-	method  string
+	methods  []string
 	regex   *regexp.Regexp
 	handler http.HandlerFunc
 }
 
-func newRoute(method, pattern string, handler http.HandlerFunc) route {
-	return route{method, regexp.MustCompile("^" + pattern + "$"), handler}
+func newRoute(methods []string, pattern string, handler http.HandlerFunc) route {
+	return route{methods, regexp.MustCompile("^" + pattern + "$"), handler}
 }
 
 func getField(r *http.Request, index int) string {

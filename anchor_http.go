@@ -25,11 +25,11 @@ func NewAnchorHTTPHandler(s anchorService) *AnchorHTTPHandler {
 }
 
 func (h *AnchorHTTPHandler) RegisterRoutes(r *Router) {
-	r.AddRoute("POST", "/anchor", h.addAnchorHandler)
-	r.AddRoute("GET", "/anchors", h.getAnchorsHandler)
-	r.AddRoute("GET", "/anchor/([^/]+)", h.getAnchorHandler)
-	r.AddRoute("PUT", "/anchor", h.updateAnchorHandler)
-	r.AddRoute("DELETE", "/anchor/([^/]+)", h.deleteAnchorHandler)
+	r.AddRoute([]string{"POST", "OPTIONS"}, "/anchor", h.addAnchorHandler)
+	r.AddRoute([]string{"GET", "OPTIONS"}, "/anchors", h.getAnchorsHandler)
+	r.AddRoute([]string{"GET", "OPTIONS"}, "/anchor/([^/]+)", h.getAnchorHandler)
+	r.AddRoute([]string{"PUT", "OPTIONS"}, "/anchor", h.updateAnchorHandler)
+	r.AddRoute([]string{"DELETE", "OPTIONS"}, "/anchor/([^/]+)", h.deleteAnchorHandler)
 }
 
 func (h *AnchorHTTPHandler) addAnchorHandler(w http.ResponseWriter, r *http.Request) {
