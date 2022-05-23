@@ -33,6 +33,10 @@ func (h *AnchorHTTPHandler) RegisterRoutes(r *Router) {
 }
 
 func (h *AnchorHTTPHandler) addAnchorHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "OPTIONS" {
+		return
+	}
+
 	type Response struct {
 		ID int `json:"id"`
 	}

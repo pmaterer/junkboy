@@ -28,18 +28,18 @@ func (h *LoggingMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type CorsMiddleware struct {
-  handler http.Handler
+	handler http.Handler
 }
 
 func NewCorsMiddleware(handler http.Handler) *CorsMiddleware {
-  return &CorsMiddleware{handler}
+	return &CorsMiddleware{handler}
 }
 
-
 func (h *CorsMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-  w.Header().Set("Access-Control-Allow-Origin", "*")
-  w.Header().Set("Access-Control-Allow-Headers", "*")
-  h.handler.ServeHTTP(w, r)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	h.handler.ServeHTTP(w, r)
 }
 
 func readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
